@@ -3,6 +3,7 @@
 #pragma hdrstop
 
 #include "ide_bilix.h"
+#include "DirectoryTreeView.hpp"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"

@@ -10,7 +10,7 @@
 #include <Vcl.ComCtrls.hpp>
 #include <Vcl.FileCtrl.hpp>
 #include <Vcl.Dialogs.hpp>
-#include "DirectoryTreeView.hpp"
+class TDirectoryTreeView;
 //---------------------------------------------------------------------------
 class TForm1 : public TForm
 {
@@ -20,7 +20,7 @@ __published:	// IDE-managed Components
 	void __fastcall Button1Click(TObject *Sender);
 
 private:	// User declarations
-    TDirectoryTreeView *TreeView1;
+    TDirectoryTreeView *TreeView1 = nullptr;
 public:		// User declarations
 	__fastcall TForm1(TComponent* Owner);
 };

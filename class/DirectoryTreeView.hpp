@@ -8,9 +8,9 @@
 class TDirectoryTreeView : public TTreeView
 {
 private:
-    TTreeNode* CurrentNode;
+    TTreeNode* CurrentNode = nullptr;
     String FBasePath;
-    TMemo* FMemo;
+    TMemo* FMemo = nullptr;
     void __fastcall AddSubItems(TTreeNode* Node, String Path);
     void __fastcall HandleExpanding(TObject* Sender, TTreeNode* Node, bool& AllowExpansion);
     void __fastcall HandleCollapsing(TObject* Sender, TTreeNode* Node, bool& AllowCollapse);

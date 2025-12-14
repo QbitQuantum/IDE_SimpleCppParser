@@ -9,8 +9,6 @@
 __fastcall TDirectoryTreeView::TDirectoryTreeView(TComponent* Owner)
     : TTreeView(Owner)
 {
-    FBasePath = "C:\\Users\\AxeMODE\\Desktop";
-    FMemo = NULL;
 
     // Подключаем обработчики событий
     this->OnExpanding = &HandleExpanding;
@@ -21,16 +19,14 @@ __fastcall TDirectoryTreeView::TDirectoryTreeView(TComponent* Owner)
 //---------------------------------------------------------------------------
 void TDirectoryTreeView::LoadDirectory(String Path)
 {
-    if (Path != "") {
-        FBasePath = Path;
-    }
+    if (Path == "")
+        return;
 
-    Items->BeginUpdate();
+    FBasePath = Path;
     Items->Clear();
 
-    TTreeNode* root = Items->Add(NULL, FBasePath);
-    Items->AddChild(root, ""); // Фиктивный узел для знака "+"
-    
+    Items->BeginUpdate();
+    Items->AddChild(Items->Add(nullptr, FBasePath), ""); // Фиктивный узел для знака "+"
     Items->EndUpdate();
 }
 //---------------------------------------------------------------------------
@@ -40,7 +36,7 @@ void TDirectoryTreeView::Init()
     Top += 50;
     Height += 400;
     Left += 8;
-    Width += 20;
+    Width += 250;
 }
 //---------------------------------------------------------------------------
 
@@ -52,25 +48,19 @@ void TDirectoryTreeView::SetMemo(TMemo* Memo)
 
 void __fastcall TDirectoryTreeView::AddSubItems(TTreeNode* Node, String Path)
 {
-    if (Node->Count > 0 && Node->Item[0]->Text != "") {
-        return;
-    }
+    if (Node->Count == 1 && Node->Item[0]->Text == "")
+        Node->Item[0]->Delete();
 
     TSearchRec sr;
-    if (FindFirst(Path + "\\*.*", faAnyFile, sr) == 0) {
-        do {
-            if (sr.Name != "." && sr.Name != "..") {
-                String fullItemPath = Path + "\\" + sr.Name;
-
-                if (DirectoryExists(fullItemPath)) {
-                    TTreeNode* childNode = Items->AddChild(Node, sr.Name);
-                    Items->AddChild(childNode, "");
-                }
-                else {
-                    Items->AddChild(Node, sr.Name);
-                }
-            }
-        } while (FindNext(sr) == 0);
+    String fullItemPath = Path + "\\*.*";
+    if (FindFirst(fullItemPath, faAnyFile, sr) == 0) {
+        while (FindNext(sr) == 0) {
+            if (sr.Name == "." || sr.Name == "..")
+                continue;
+            (sr.Attr & faDirectory) ?
+                Items->AddChild(Items->AddChild(Node, sr.Name), "") :
+                Items->AddChild(Node, sr.Name);
+        };
         FindClose(sr);
     }
 }
@@ -110,19 +100,11 @@ void __fastcall TDirectoryTreeView::HandleExpanding(TObject* Sender, TTreeNode* 
     String fullPath = "";
     TTreeNode* currentNode = Node;
 
-    while (currentNode != NULL) {
-        if (fullPath != "") {
-            fullPath = currentNode->Text + "\\" + fullPath;
-        }
-        else {
-            fullPath = currentNode->Text;
-        }
+    while (currentNode) {
+        fullPath = currentNode->Text + "\\" + fullPath;
         currentNode = currentNode->Parent;
     }
 
-    if (Node->Count == 1 && Node->Item[0]->Text == "") {
-        Node->Item[0]->Delete();
-    }
 
     AddSubItems(Node, fullPath);
 
@@ -148,7 +130,7 @@ String __fastcall TDirectoryTreeView::GetFullPath(TTreeNode* Node)
     String fullPath = Node->Text;
     TTreeNode* parent = Node->Parent;
 
-    while (parent != NULL) {
+    while (parent) {
         fullPath = parent->Text + "\\" + fullPath;
         parent = parent->Parent;
     }
